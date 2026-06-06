@@ -1,5 +1,6 @@
 import { DocumentRepository } from "../repositories/document.repo.js";
 import { MinioStorageService, IStorageService } from "./storage/minioStorage.js";
+import { createStorageService } from "./storage/storage.factory.js";
 import { ForbiddenError, NotFoundError, BadRequestError } from "../errors/index.js";
 import prisma from "../config/prisma.js";
 
@@ -9,7 +10,7 @@ export class DocumentService {
 
   constructor() {
     this.documentRepo = new DocumentRepository();
-    this.storageService = new MinioStorageService();
+    this.storageService = createStorageService("classroom-documents");
   }
 
   public async uploadDocument(

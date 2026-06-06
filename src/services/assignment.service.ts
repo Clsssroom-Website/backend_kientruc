@@ -1,5 +1,6 @@
 import { AssignmentRepository, QuizQuestionInput } from "../repositories/assignment.repo.js";
 import { MinioStorageService, IStorageService } from "./storage/minioStorage.js";
+import { createStorageService } from "./storage/storage.factory.js";
 import { NotFoundError, ForbiddenError, BadRequestError } from "../errors/index.js";
 import prisma from "../config/prisma.js";
 import { eventBus } from "../events/eventBus.js";
@@ -10,7 +11,7 @@ export class AssignmentService {
 
   constructor() {
     this.assignmentRepo = new AssignmentRepository();
-    this.storageService = new MinioStorageService("classroom-assignments");
+    this.storageService = createStorageService("classroom-assignments");
   }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -388,7 +389,7 @@ export class AssignmentService {
   public async getSubmissionsByAssignmentId(teacherId: string, assignmentId: string) {
     await this.ensureTeacherOwnsAssignment(teacherId, assignmentId);
     const submissions = await this.assignmentRepo.findSubmissionsByAssignmentId(assignmentId);
-    const submissionStorageService = new MinioStorageService("classroom-submissions");
+    const submissionStorageService = createStorageService("classroom-submissions");
 
     const serialized = await Promise.all(
       submissions.map(async (sub: any) => {

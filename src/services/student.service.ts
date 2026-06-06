@@ -2,10 +2,10 @@ import { v4 as uuidv4 } from "uuid";
 import * as StudentRepo from "../repositories/student.repo.js";
 import * as ClassRepo from "../repositories/class.repo.js";
 import { NotFoundError, ForbiddenError, BadRequestError } from "../errors/index.js";
-import { MinioStorageService } from "./storage/minioStorage.js";
+import { createStorageService } from "./storage/storage.factory.js";
 
-const storageService = new MinioStorageService("classroom-assignments");
-const submissionStorageService = new MinioStorageService("classroom-submissions");
+const storageService = createStorageService("classroom-assignments");
+const submissionStorageService = createStorageService("classroom-submissions");
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import * as ClassService from "../services/class.service.js";
 import * as StudentService from "../services/student.service.js";
 import { UnauthorizedError, ForbiddenError, BadRequestError } from "../errors/index.js";
+import { createStorageService } from "../services/storage/storage.factory.js";
 
 // ─── Guards ───────────────────────────────────────────────────────────────────
 
@@ -97,8 +98,7 @@ export const submitAssignment = async (req: Request<{ assignmentId: string }>, r
     const attachments: { fileName: string; fileUri: string; fileSize: number }[] = [];
 
     if (files && files.length > 0) {
-      const { MinioStorageService } = await import("../services/storage/minioStorage.js");
-      const storageService = new MinioStorageService("classroom-submissions");
+      const storageService = createStorageService("classroom-submissions");
       for (const file of files) {
         const result = await storageService.uploadFile(file.buffer, file.originalname, file.mimetype);
         attachments.push({ fileName: file.originalname, fileUri: result.url, fileSize: result.size });

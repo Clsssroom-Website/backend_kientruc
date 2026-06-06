@@ -1,7 +1,7 @@
 import * as DashboardRepo from "../repositories/dashboard.repo.js";
-import { MinioStorageService } from "./storage/minioStorage.js";
+import { createStorageService } from "./storage/storage.factory.js";
 
-const submissionStorageService = new MinioStorageService("classroom-submissions");
+const submissionStorageService = createStorageService("classroom-submissions");
 
 const serializeSubmissionAttachments = async (attachments: any[]) => {
   return Promise.all(

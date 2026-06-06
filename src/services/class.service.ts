@@ -1,10 +1,10 @@
 import { v4 as uuidv4 } from "uuid";
 import * as ClassRepo from "../repositories/class.repo.js";
 import { NotFoundError, ForbiddenError, BadRequestError } from "../errors/index.js";
-import { MinioStorageService } from "./storage/minioStorage.js";
+import { createStorageService } from "./storage/storage.factory.js";
 
-const storageServiceAssignments = new MinioStorageService("classroom-assignments");
-const storageServiceDocuments = new MinioStorageService("classroom-documents");
+const storageServiceAssignments = createStorageService("classroom-assignments");
+const storageServiceDocuments   = createStorageService("classroom-documents");
 
 const generateJoinCode = (length = 6): string => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
