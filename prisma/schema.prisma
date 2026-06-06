@@ -1,0 +1,161 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+}
+
+model AssignmentAttachments {
+  attachmentId String      @id(map: "PK__Assignme__C417BD8125BC0F49") @db.VarChar(50)
+  assignmentId String      @db.VarChar(50)
+  fileName     String      @db.NVarChar(255)
+  fileUrl      String      @db.VarChar(500)
+  fileSize     BigInt?
+  uploadedAt   DateTime?   @default(now(), map: "DF__Assignmen__uploa__5DCAEF64") @db.DateTime
+  Assignments  Assignments @relation(fields: [assignmentId], references: [assignmentId], onUpdate: NoAction, map: "FK_AssignAttach_Assign")
+}
+
+model Assignments {
+  assignmentId          String                  @id(map: "PK__Assignme__52C218208AD0D2BC") @db.VarChar(50)
+  classId               String                  @db.VarChar(50)
+  title                 String                  @db.NVarChar(255)
+  description           String?                 @db.NVarChar(Max)
+  deadline              DateTime                @db.DateTime
+  typeAssignment        String?                 @db.VarChar(20)
+  status                String?                 @default("ACTIVE", map: "DF__Assignmen__statu__59063A47") @db.VarChar(20)
+  createdAt             DateTime?               @default(now(), map: "DF__Assignmen__creat__59FA5E80") @db.DateTime
+  AssignmentAttachments AssignmentAttachments[]
+  Classes               Classes                 @relation(fields: [classId], references: [classId], onUpdate: NoAction, map: "FK_Assignments_Class")
+  Grades                Grades[]
+  QuizQuestions         QuizQuestions[]
+  Submissions           Submissions[]
+}
+
+model QuizQuestions {
+  questionId         String               @id @db.VarChar(50)
+  assignmentId       String               @db.VarChar(50)
+  questionText       String               @db.NVarChar(Max)
+  points             Float                @default(1.0)
+  sortOrder          Int                  @default(1)
+  QuizOptions        QuizOptions[]
+  Assignments        Assignments          @relation(fields: [assignmentId], references: [assignmentId], onDelete: Cascade, map: "FK_QuizQuestions_Assign")
+  StudentQuizAnswers StudentQuizAnswers[]
+}
+
+model QuizOptions {
+  optionId           String               @id @db.VarChar(50)
+  questionId         String               @db.VarChar(50)
+  optionText         String               @db.NVarChar(Max)
+  isCorrect          Boolean              @default(false)
+  QuizQuestions      QuizQuestions        @relation(fields: [questionId], references: [questionId], onDelete: Cascade, map: "FK_QuizOptions_Question")
+  StudentQuizAnswers StudentQuizAnswers[]
+}
+
+model ClassEnrollments {
+  enrollmentId String    @id(map: "PK__ClassEnr__ACFF2C86519ADA9A") @db.VarChar(50)
+  classId      String    @db.VarChar(50)
+  studentId    String    @db.VarChar(50)
+  joinTime     DateTime? @default(now(), map: "DF__ClassEnro__joinT__534D60F1") @db.DateTime
+  status       String?   @default("JOINED", map: "DF__ClassEnro__statu__5441852A") @db.VarChar(20)
+  Classes      Classes   @relation(fields: [classId], references: [classId], onUpdate: NoAction, map: "FK_Enroll_Class")
+  Users        Users     @relation(fields: [studentId], references: [userId], onUpdate: NoAction, map: "FK_Enroll_Student")
+}
+
+model Classes {
+  classId          String             @id(map: "PK__Classes__7577347E06C3508F") @db.VarChar(50)
+  teacherId        String             @db.VarChar(50)
+  className        String             @db.NVarChar(255)
+  description      String?            @db.NVarChar(Max)
+  room             String?            @db.VarChar(50)
+  topic            String?            @db.NVarChar(255)
+  joinCode         String?            @unique(map: "UQ__Classes__F5144108F8194BF7") @db.VarChar(20)
+  joinLink         String?            @db.VarChar(500)
+  status           String?            @default("ACTIVE", map: "DF__Classes__status__4E88ABD4") @db.VarChar(20)
+  createdAt        DateTime?          @default(now(), map: "DF__Classes__created__4F7CD00D") @db.DateTime
+  Assignments      Assignments[]
+  ClassEnrollments ClassEnrollments[]
+  Users            Users              @relation(fields: [teacherId], references: [userId], onUpdate: NoAction, map: "FK_Classes_Teacher")
+  Documents        Documents[]
+  Grades           Grades[]
+}
+
+model DocumentAttachments {
+  attachmentId String    @id(map: "PK__Document__C417BD813C58AEFC") @db.VarChar(50)
+  documentId   String    @db.VarChar(50)
+  fileName     String    @db.NVarChar(255)
+  fileUri      String    @db.VarChar(500)
+  fileSize     BigInt?
+  uploadedAt   DateTime? @default(now(), map: "DF__DocumentA__uploa__656C112C") @db.DateTime
+  Documents    Documents @relation(fields: [documentId], references: [documentId], onUpdate: NoAction, map: "FK_DocAttach_Doc")
+}
+
+model Documents {
+  documentId          String                @id(map: "PK__Document__EFAAAD85F0E479FD") @db.VarChar(50)
+  classId             String                @db.VarChar(50)
+  title               String                @db.NVarChar(255)
+  description         String?               @db.NVarChar(Max)
+  uploadTime          DateTime?             @default(now(), map: "DF__Documents__uploa__619B8048") @db.DateTime
+  DocumentAttachments DocumentAttachments[]
+  Classes             Classes               @relation(fields: [classId], references: [classId], onUpdate: NoAction, map: "FK_Documents_Class")
+}
+
+model Grades {
+  gradeId      String       @id(map: "PK__Grades__FB4362F99D055AD9") @db.VarChar(50)
+  submissionId String?      @db.VarChar(50)
+  studentId    String       @db.VarChar(50)
+  classId      String       @db.VarChar(50)
+  assignmentId String       @db.VarChar(50)
+  score        Float?
+  comment      String?      @db.NVarChar(Max)
+  gradedAt     DateTime?    @default(now(), map: "DF__Grades__gradedAt__72C60C4A") @db.DateTime
+  Assignments  Assignments  @relation(fields: [assignmentId], references: [assignmentId], onUpdate: NoAction, map: "FK_Grades_Assign")
+  Classes      Classes      @relation(fields: [classId], references: [classId], onUpdate: NoAction, map: "FK_Grades_Class")
+  Users        Users        @relation(fields: [studentId], references: [userId], onUpdate: NoAction, map: "FK_Grades_Student")
+  Submissions  Submissions? @relation(fields: [submissionId], references: [submissionId], onDelete: NoAction, onUpdate: NoAction, map: "FK_Grades_Sub")
+}
+
+model SubmissionAttachments {
+  attachmentId String      @id(map: "PK__Submissi__C417BD8132DC689E") @db.VarChar(50)
+  submissionId String      @db.VarChar(50)
+  fileName     String      @db.NVarChar(255)
+  fileUri      String      @db.VarChar(500)
+  fileSize     BigInt?
+  uploadedAt   DateTime?   @default(now(), map: "DF__Submissio__uploa__6E01572D") @db.DateTime
+  Submissions  Submissions @relation(fields: [submissionId], references: [submissionId], onUpdate: NoAction, map: "FK_SubAttach_Sub")
+}
+
+model Submissions {
+  submissionId          String                  @id(map: "PK__Submissi__B1DEEF52DD7613DE") @db.VarChar(50)
+  assignmentId          String                  @db.VarChar(50)
+  studentId             String                  @db.VarChar(50)
+  submittedAt           DateTime?               @default(now(), map: "DF__Submissio__submi__693CA210") @db.DateTime
+  status                String?                 @db.VarChar(20)
+  Grades                Grades[]
+  StudentQuizAnswers    StudentQuizAnswers[]
+  SubmissionAttachments SubmissionAttachments[]
+  Assignments           Assignments             @relation(fields: [assignmentId], references: [assignmentId], onUpdate: NoAction, map: "FK_Submissions_Assign")
+  Users                 Users                   @relation(fields: [studentId], references: [userId], onUpdate: NoAction, map: "FK_Submissions_Student")
+}
+
+model StudentQuizAnswers {
+  studentAnswerId  String        @id @db.VarChar(50)
+  submissionId     String        @db.VarChar(50)
+  questionId       String        @db.VarChar(50)
+  selectedOptionId String        @db.VarChar(50)
+  QuizOptions      QuizOptions   @relation(fields: [selectedOptionId], references: [optionId], onUpdate: NoAction, map: "FK_StudentAnswers_Option")
+  QuizQuestions    QuizQuestions @relation(fields: [questionId], references: [questionId], onUpdate: NoAction, map: "FK_StudentAnswers_Question")
+  Submissions      Submissions   @relation(fields: [submissionId], references: [submissionId], onDelete: Cascade, map: "FK_StudentAnswers_Sub")
+}
+
+model Users {
+  userId           String             @id(map: "PK__Users__CB9A1CFF070BAB18") @db.VarChar(50)
+  name             String             @db.NVarChar(255)
+  email            String             @unique(map: "UQ__Users__AB6E61648D305C34") @db.VarChar(255)
+  passwordHash     String             @db.VarChar(500)
+  role             String             @db.VarChar(20)
+  ClassEnrollments ClassEnrollments[]
+  Classes          Classes[]
+  Grades           Grades[]
+  Submissions      Submissions[]
+}

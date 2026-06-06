@@ -1,0 +1,9 @@
+node_modules/
+.env
+
+/src/generated/prisma
+
+implementation_plan.md
+mau kien truc.txt
+
+dist/
