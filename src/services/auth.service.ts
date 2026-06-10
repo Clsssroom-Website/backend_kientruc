@@ -1,12 +1,13 @@
 import { v4 as uuidv4 } from "uuid";
 import * as UserRepo from "../repositories/user.repo.js";
 import * as SessionRepo from "../repositories/session.repo.js";
-import { HashStrategy } from "./token/hash.strategy.js";
-import { TokenStrategy } from "./token/token.strategy.js";
+import { IHashStrategy, BcryptHashStrategy } from "./token/hash.strategy.js";
+import { ITokenStrategy, JwtTokenStrategy } from "./token/token.strategy.js";
 import { RegisterDTO, LoginDTO } from "../domain/validators/auth.validator.js";
 
-const hashStrategy = new HashStrategy();
-const tokenStrategy = new TokenStrategy();
+const hashStrategy: IHashStrategy = new BcryptHashStrategy();
+const tokenStrategy: ITokenStrategy = new JwtTokenStrategy();
+
 
 // TTL for refresh token in Redis (7 days in seconds)
 const REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60;

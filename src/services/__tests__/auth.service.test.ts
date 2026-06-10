@@ -17,25 +17,29 @@ vi.mock("uuid", () => ({
 // Mock HashStrategy: hash luôn trả về "hashedPassword",
 // compare trả về true CHỈ khi password = "correctPassword" và hash = "hashedPassword"
 vi.mock("../token/hash.strategy.js", () => {
+  const MockHashStrategy = class {
+    hash = vi.fn().mockResolvedValue("hashedPassword");
+    compare = vi.fn((pass, hash) =>
+      Promise.resolve(pass === "correctPassword" && hash === "hashedPassword")
+    );
+  };
   return {
-    HashStrategy: class {
-      hash = vi.fn().mockResolvedValue("hashedPassword");
-      compare = vi.fn((pass, hash) =>
-        Promise.resolve(pass === "correctPassword" && hash === "hashedPassword")
-      );
-    },
+    HashStrategy: MockHashStrategy,
+    BcryptHashStrategy: MockHashStrategy,
   };
 });
 
 // Mock TokenStrategy: các token luôn cố định để dễ kiểm tra
 vi.mock("../token/token.strategy.js", () => {
+  const MockTokenStrategy = class {
+    generateAccessToken = vi.fn().mockReturnValue("mockAccessToken");
+    generateRefreshToken = vi.fn().mockReturnValue("mockRefreshToken");
+    // Mặc định verifyRefreshToken không throw (token hợp lệ)
+    verifyRefreshToken = vi.fn().mockReturnValue({ userId: "user-1" });
+  };
   return {
-    TokenStrategy: class {
-      generateAccessToken = vi.fn().mockReturnValue("mockAccessToken");
-      generateRefreshToken = vi.fn().mockReturnValue("mockRefreshToken");
-      // Mặc định verifyRefreshToken không throw (token hợp lệ)
-      verifyRefreshToken = vi.fn().mockReturnValue({ userId: "user-1" });
-    },
+    TokenStrategy: MockTokenStrategy,
+    JwtTokenStrategy: MockTokenStrategy,
   };
 });
 
@@ -274,23 +278,27 @@ describe("AuthService - refreshAccessToken", () => {
     vi.mocked(SessionRepo.findUserIdByRefreshToken).mockResolvedValue("user-1");
 
     // Ghi đè mock để verifyRefreshToken ném lỗi (token giả mạo)
-    const { TokenStrategy } = await import("../token/token.strategy.js");
-    const instance = new TokenStrategy();
+    const { JwtTokenStrategy } = await import("../token/token.strategy.js");
+    const instance = new JwtTokenStrategy();
     vi.spyOn(instance, "verifyRefreshToken").mockImplementation(() => {
       throw new Error("invalid signature");
     });
 
     // Import lại module để dùng instance mới... hoặc test thông qua mock toàn bộ:
     // Cách đơn giản: override module-level mock
-    vi.doMock("../token/token.strategy.js", () => ({
-      TokenStrategy: class {
+    vi.doMock("../token/token.strategy.js", () => {
+      const MockTokenStrategy = class {
         generateAccessToken = vi.fn().mockReturnValue("mockAccessToken");
         generateRefreshToken = vi.fn().mockReturnValue("mockRefreshToken");
         verifyRefreshToken = vi.fn().mockImplementation(() => {
           throw new Error("invalid signature");
         });
-      },
-    }));
+      };
+      return {
+        TokenStrategy: MockTokenStrategy,
+        JwtTokenStrategy: MockTokenStrategy,
+      };
+    });
 
     // Vì mock class đã được tạo sẵn khi module load, ta test gián tiếp:
     // findUserIdByRefreshToken trả về null → sẽ throw trước khi verify

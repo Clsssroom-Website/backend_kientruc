@@ -10,7 +10,14 @@ export interface TokenPayload {
   role: string;
 }
 
-export class TokenStrategy {
+export interface ITokenStrategy {
+  generateAccessToken(payload: TokenPayload): string;
+  generateRefreshToken(payload: { userId: string }): string;
+  verifyAccessToken(token: string): TokenPayload;
+  verifyRefreshToken(token: string): { userId: string };
+}
+
+export class JwtTokenStrategy implements ITokenStrategy {
   generateAccessToken(payload: TokenPayload): string {
     return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
   }
@@ -27,3 +34,7 @@ export class TokenStrategy {
     return jwt.verify(token, REFRESH_TOKEN_SECRET) as { userId: string };
   }
 }
+
+// Keep the old name as an alias for backward compatibility or ease of migration
+export { JwtTokenStrategy as TokenStrategy };
+

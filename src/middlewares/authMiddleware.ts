@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import { UnauthorizedError } from "../errors/index.js";
-import { TokenStrategy, TokenPayload } from "../services/token/token.strategy.js";
+import { ITokenStrategy, JwtTokenStrategy, TokenPayload } from "../services/token/token.strategy.js";
 
-const tokenStrategy = new TokenStrategy();
+const tokenStrategy: ITokenStrategy = new JwtTokenStrategy();
+
 
 export interface AuthRequest extends Request {
   user?: TokenPayload;
