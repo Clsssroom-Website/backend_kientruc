@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
-import { getDashboard, getDashboardStats, getPendingSubmissionsToGrade } from "../controllers/dashboardController.js";
+import { dashboardController } from "../controllers/dashboardController.js";
 
 const router = Router();
 
@@ -9,38 +9,26 @@ router.use(authMiddleware);
 
 /**
  * GET /api/v1/dashboard
- * Lấy toàn bộ dữ liệu dashboard của giáo viên đang đăng nhập.
+ * Lấy toàn bộ dữ liệu Dashboard của giáo viên đang đăng nhập.
+ * Query: ?limit=10 — số bài nộp chờ chấm tối đa
  *
- * Response:
- * {
- *   success: true,
- *   data: {
- *     stats: { totalClasses, totalStudents, pendingGrades },
- *     classes: ClassSummaryDTO[],
- *     pendingSubmissions: SubmissionToGradeDTO[],
- *     upcomingAssignments: UpcomingAssignmentDTO[],
- *     recentActivities: RecentActivityDTO[]
- *   }
- * }
+ * Response: { success, data: { stats, classes, pendingSubmissions, upcomingAssignments, recentActivities } }
  */
-router.get("/", getDashboard);
+router.get("/", dashboardController.getDashboard);
 
 /**
  * GET /api/v1/dashboard/stats
  * Chỉ lấy số liệu tổng hợp (nhẹ hơn, dùng để refresh nhanh).
  *
- * Response:
- * {
- *   success: true,
- *   data: { totalClasses, totalStudents, pendingGrades }
- * }
+ * Response: { success, data: { totalClasses, totalStudents, pendingGrades } }
  */
-router.get("/stats", getDashboardStats);
+router.get("/stats", dashboardController.getDashboardStats);
 
 /**
  * GET /api/v1/dashboard/submissions-to-grade
- * Lấy danh sách bài nộp chưa chấm của giáo viên đang đăng nhập có phân trang.
+ * Lấy danh sách bài nộp ESSAY chưa có điểm kèm phân trang.
+ * Query: ?page=1&limit=10
  */
-router.get("/submissions-to-grade", getPendingSubmissionsToGrade);
+router.get("/submissions-to-grade", dashboardController.getPendingSubmissionsToGrade);
 
 export default router;

@@ -7,6 +7,9 @@ import { ensureClassActive } from "../middlewares/classMiddleware.js";
 
 const router = Router();
 
+// ─── Mutations ────────────────────────────────────────────────────────────────
+
+// POST /api/v1/documents/upload  (chỉ teacher chủ lớp)
 router.post(
   "/upload",
   authMiddleware,
@@ -16,21 +19,7 @@ router.post(
   documentController.upload
 );
 
-router.get(
-  "/class/:classId",
-  authMiddleware,
-  // Cả HỌC SINH và GIÁO VIÊN đều được xem (logic kiểm tra ở Service)
-  documentController.getDocumentsByClassId
-);
-
-// Route để lấy URL tải file
-router.get(
-  "/attachment/:attachmentId/download",
-  authMiddleware,
-  documentController.getAttachmentDownloadUrl
-);
-
-// Route chỉnh sửa tài liệu
+// PUT /api/v1/documents/:documentId  (chỉ teacher chủ lớp, lớp phải ACTIVE)
 router.put(
   "/:documentId",
   authMiddleware,
@@ -40,13 +29,30 @@ router.put(
   documentController.update
 );
 
-// Route xóa tài liệu
+// DELETE /api/v1/documents/:documentId  (chỉ teacher chủ lớp, lớp phải ACTIVE)
 router.delete(
   "/:documentId",
   authMiddleware,
   requireRole(["teacher"]),
   ensureClassActive,
   documentController.delete
+);
+
+// ─── Queries ──────────────────────────────────────────────────────────────────
+
+// GET /api/v1/documents/class/:classId  (teacher + student đã tham gia đều xem được)
+router.get(
+  "/class/:classId",
+  authMiddleware,
+  documentController.getDocumentsByClassId
+);
+
+// GET /api/v1/documents/attachment/:attachmentId/download
+// Query: ?action=download → force download | không có → inline preview
+router.get(
+  "/attachment/:attachmentId/download",
+  authMiddleware,
+  documentController.getAttachmentDownloadUrl
 );
 
 export default router;

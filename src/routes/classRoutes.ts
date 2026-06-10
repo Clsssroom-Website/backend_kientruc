@@ -1,38 +1,44 @@
 import { Router } from "express";
-import { createClass, updateClass, deleteClass, getAllClasses, getClassById, getClassStudents, getClassStream, removeStudentFromClass, getClassGrades } from "../controllers/classController.js";
+import { classController } from "../controllers/classController.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 import { ensureClassActive } from "../middlewares/classMiddleware.js";
 
-
 const router = Router();
 
-// GET /api/v1/classes - API lấy danh sách lớp học theo teacherId
-router.get("/", authMiddleware, getAllClasses);
+// ─── GET ──────────────────────────────────────────────────────────────────────
 
-// GET /api/v1/classes/:id - API lấy chi tiết 1 lớp học
-router.get("/:id", authMiddleware, getClassById);
+// GET /api/v1/classes
+// Teacher → lớp do mình tạo | Student → lớp đã tham gia
+router.get("/", authMiddleware, classController.getAllClasses);
 
-// GET /api/v1/classes/:id/stream - API lấy bảng tin lớp học
-router.get("/:id/stream", authMiddleware, getClassStream);
+// GET /api/v1/classes/:id
+router.get("/:id", authMiddleware, classController.getClassById);
 
-// GET /api/v1/classes/:id/students - API lấy danh sách học sinh của lớp
-router.get("/:id/students", authMiddleware, getClassStudents);
+// GET /api/v1/classes/:id/stream
+router.get("/:id/stream", authMiddleware, classController.getClassStream);
 
-// GET /api/v1/classes/:id/grades - API lấy bảng điểm lớp học (gồm danh sách điểm từng học sinh và điểm trung bình)
-router.get("/:id/grades", authMiddleware, getClassGrades);
+// GET /api/v1/classes/:id/students (chỉ teacher)
+router.get("/:id/students", authMiddleware, classController.getClassStudents);
 
-// DELETE /api/v1/classes/:id/students/:studentId - API xóa học sinh khỏi lớp
-router.delete("/:id/students/:studentId", authMiddleware, ensureClassActive, removeStudentFromClass);
+// GET /api/v1/classes/:id/grades (chỉ teacher chủ lớp)
+router.get("/:id/grades", authMiddleware, classController.getClassGrades);
 
-// POST /api/v1/classes - API tạo lớp học
-router.post("/", authMiddleware, createClass);
+// ─── POST ─────────────────────────────────────────────────────────────────────
 
-// PUT /api/v1/classes/:id - API cập nhật lớp học
-router.put("/:id", authMiddleware, ensureClassActive, updateClass);
+// POST /api/v1/classes (chỉ teacher)
+router.post("/", authMiddleware, classController.createClass);
 
-// DELETE /api/v1/classes/:id - API xóa lớp học
-router.delete("/:id", authMiddleware, ensureClassActive, deleteClass);
+// ─── PUT ──────────────────────────────────────────────────────────────────────
 
+// PUT /api/v1/classes/:id (chỉ teacher chủ lớp, lớp phải ACTIVE)
+router.put("/:id", authMiddleware, ensureClassActive, classController.updateClass);
 
+// ─── DELETE ───────────────────────────────────────────────────────────────────
+
+// DELETE /api/v1/classes/:id/students/:studentId (chỉ teacher chủ lớp, lớp phải ACTIVE)
+router.delete("/:id/students/:studentId", authMiddleware, ensureClassActive, classController.removeStudentFromClass);
+
+// DELETE /api/v1/classes/:id (chỉ teacher chủ lớp, lớp phải ACTIVE)
+router.delete("/:id", authMiddleware, ensureClassActive, classController.deleteClass);
 
 export default router;

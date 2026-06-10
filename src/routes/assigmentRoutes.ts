@@ -10,24 +10,24 @@ import { assignmentController } from "../controllers/assignmentController.js";
 
 const router = Router();
 
-// ─── Teacher: Assignment CRUD ──────────────────────────────────────────────────
+// ─── Teacher: Assignment CRUD ─────────────────────────────────────────────────
 
-// GET /api/v1/classes/:id/assignments — danh sách bài tập của lớp
+// GET /api/v1/classes/:id/assignments
 router.get(
   "/:id/assignments",
   authMiddleware,
-  assignmentController.getAssignments.bind(assignmentController)
+  assignmentController.getAssignments
 );
 
-// GET /api/v1/classes/:id/assignments/:assignmentId — chi tiết bài tập (bao gồm quiz + isCorrect)
+// GET /api/v1/classes/:id/assignments/:assignmentId
 router.get(
   "/:id/assignments/:assignmentId",
   authMiddleware,
   requireRole(["teacher"]),
-  assignmentController.getAssignmentDetail.bind(assignmentController)
+  assignmentController.getAssignmentDetail
 );
 
-// POST /api/v1/classes/:id/assignments — tạo bài tập mới
+// POST /api/v1/classes/:id/assignments
 router.post(
   "/:id/assignments",
   authMiddleware,
@@ -35,10 +35,10 @@ router.post(
   ensureClassActive,
   uploadMultipleMiddleware,
   validate(createAssignmentSchema),
-  assignmentController.createAssignment.bind(assignmentController)
+  assignmentController.createAssignment
 );
 
-// PUT /api/v1/classes/:id/assignments/:assignmentId — cập nhật bài tập
+// PUT /api/v1/classes/:id/assignments/:assignmentId
 router.put(
   "/:id/assignments/:assignmentId",
   authMiddleware,
@@ -46,45 +46,45 @@ router.put(
   ensureClassActive,
   uploadMultipleMiddleware,
   validate(updateAssignmentSchema),
-  assignmentController.updateAssignment.bind(assignmentController)
+  assignmentController.updateAssignment
 );
 
-// DELETE /api/v1/classes/:id/assignments/:assignmentId — xóa bài tập
+// DELETE /api/v1/classes/:id/assignments/:assignmentId
 router.delete(
   "/:id/assignments/:assignmentId",
   authMiddleware,
   requireRole(["teacher"]),
   ensureClassActive,
-  assignmentController.deleteAssignment.bind(assignmentController)
+  assignmentController.deleteAssignment
 );
 
-// DELETE /api/v1/classes/:id/assignments/:assignmentId/attachments/:attachmentId — xóa 1 file đính kèm
+// DELETE /api/v1/classes/:id/assignments/:assignmentId/attachments/:attachmentId
 router.delete(
   "/:id/assignments/:assignmentId/attachments/:attachmentId",
   authMiddleware,
   requireRole(["teacher"]),
   ensureClassActive,
-  assignmentController.deleteAttachment.bind(assignmentController)
+  assignmentController.deleteAttachment
 );
 
-// ─── Teacher: Submission & Grading ────────────────────────────────────────────
+// ─── Teacher: Submission & Grading ───────────────────────────────────────────
 
-// GET /api/v1/classes/:id/assignments/:assignmentId/submissions — xem bài nộp
+// GET /api/v1/classes/:id/assignments/:assignmentId/submissions
 router.get(
   "/:id/assignments/:assignmentId/submissions",
   authMiddleware,
   requireRole(["teacher"]),
-  assignmentController.getSubmissions.bind(assignmentController)
+  assignmentController.getSubmissions
 );
 
-// POST /api/v1/classes/:id/assignments/:assignmentId/submissions/:submissionId/grade — chấm điểm
+// POST /api/v1/classes/:id/assignments/:assignmentId/submissions/:submissionId/grade
 router.post(
   "/:id/assignments/:assignmentId/submissions/:submissionId/grade",
   authMiddleware,
   requireRole(["teacher"]),
   ensureClassActive,
   validate(gradeSubmissionSchema),
-  assignmentController.gradeSubmission.bind(assignmentController)
+  assignmentController.gradeSubmission
 );
 
 export default router;
